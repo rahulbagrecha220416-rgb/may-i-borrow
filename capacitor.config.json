@@ -1,0 +1,13 @@
+{
+  "appId": "com.mayiborrow.app",
+  "appName": "May We Borrow",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true
+  }
+}

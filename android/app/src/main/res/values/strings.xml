@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">May I Borrow</string>
+    <string name="title_activity_main">May I Borrow</string>
+    <string name="package_name">com.mayiborrow.app</string>
+    <string name="custom_url_scheme">com.mayiborrow.app</string>
+</resources>

@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --font-sans: 'Outfit', sans-serif;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: #F2ECE3;
+    /* boho warm beige - paper feel */
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.3s ease;
+}
+
+/* Dark mode styles */
+.dark body {
+    background-color: #2A1F1A;
+    /* boho-dark-bg */
+    color: #F5E6D3;
+    /* boho-sand */
+}
+
+.dark .bg-gray-50 {
+    background-color: #1e293b;
+}
+
+.dark .text-gray-900 {
+    color: #f1f5f9;
+}
+
+.dark .text-gray-500 {
+    color: #94a3b8;
+}
+
+.dark .text-gray-400 {
+    color: #cbd5e1;
+}
+
+.dark .border-gray-100 {
+    border-color: #334155;
+}
+
+.dark .border-gray-200 {
+    border-color: #475569;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #e2e8f0;
+    border-radius: 20px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #475569;
+}
+
+/* Smooth transitions for theme changes */
+* {
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
+}
