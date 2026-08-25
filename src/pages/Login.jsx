@@ -177,6 +177,8 @@ const Login = () => {
                                     <input
                                         type="email"
                                         placeholder="Email"
+                                        aria-label="Email"
+                                        autoComplete="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
@@ -185,6 +187,8 @@ const Login = () => {
                                     <input
                                         type="password"
                                         placeholder="Password"
+                                        aria-label="Password"
+                                        autoComplete="current-password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
@@ -223,6 +227,8 @@ const Login = () => {
                                     <input
                                         type="email"
                                         placeholder="Email"
+                                        aria-label="Email"
+                                        autoComplete="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
@@ -231,6 +237,8 @@ const Login = () => {
                                     <input
                                         type="password"
                                         placeholder="Password (minimum 6 characters)"
+                                        aria-label="Password"
+                                        autoComplete="new-password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"

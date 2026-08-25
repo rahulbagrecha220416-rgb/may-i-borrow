@@ -2,7 +2,9 @@
 export const MOCK_USERS = [
     { id: 'u1', name: 'Rahul', email: 'rahul@example.com', avatar: 'https://i.pravatar.cc/150?u=u1', groups: ['g1', 'g2'] },
     { id: 'u2', name: 'Priya', email: 'priya@example.com', avatar: 'https://i.pravatar.cc/150?u=u2', groups: ['g1'] },
-    { id: 'u3', name: 'Amit', email: 'amit@example.com', avatar: 'https://i.pravatar.cc/150?u=u3', groups: ['g1', 'g2'] }
+    { id: 'u3', name: 'Amit', email: 'amit@example.com', avatar: 'https://i.pravatar.cc/150?u=u3', groups: ['g1', 'g2'] },
+    { id: 'u4', name: 'Sneha', email: 'sneha@example.com', avatar: 'https://i.pravatar.cc/150?u=u4', groups: ['g1'] },
+    { id: 'u5', name: 'Vikram', email: 'vikram@example.com', avatar: 'https://i.pravatar.cc/150?u=u5', groups: ['g1'] }
 ];
 
 export const MOCK_GROUPS = [
@@ -11,6 +13,7 @@ export const MOCK_GROUPS = [
         name: 'Prestige Apartment Tower A',
         description: 'Neighbors from Tower A sharing tools and kids items.',
         members: ['u1', 'u2', 'u3'],
+        governanceType: 'monarchy',
         image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=500&auto=format&fit=crop'
     },
     {
@@ -18,9 +21,21 @@ export const MOCK_GROUPS = [
         name: 'Cycling Club Indiranagar',
         description: 'Weekend riders group.',
         members: ['u1', 'u3'],
+        governanceType: 'republic',
         image: 'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=500&auto=format&fit=crop'
     }
 ];
+
+// Demo proposals shown in guest mode so the Republic voting flow is visible.
+export const MOCK_PROPOSALS = {
+    g2: [
+        { id: 'p1', title: 'Buy a shared track pump for the clubhouse', description: 'Splitting the cost ~₹150 each.', status: 'OPEN', yes: 4, no: 1, myVote: null, created_by: 'u1' },
+        { id: 'p2', title: 'Move Saturday rides to 6 AM in summer', description: 'Beat the heat.', status: 'CLOSED', yes: 6, no: 2, myVote: 'yes', created_by: 'u3' }
+    ],
+    g1: [
+        { id: 'p3', title: 'Add a shared ladder to the lobby cupboard', description: 'For everyone to use.', status: 'OPEN', yes: 2, no: 0, myVote: null, created_by: 'u1' }
+    ]
+};
 
 export const MOCK_ITEMS = [
     {

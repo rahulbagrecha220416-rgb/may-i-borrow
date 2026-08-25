@@ -17,8 +17,36 @@ const ItemDetails = () => {
 
     // Derived State
     const item = items?.find(i => i.id == itemId); // Loose equality for string/number mismatch
-    // Fallback owner logic if item doesn't have owner object attached
-    const owner = item?.owner || MOCK_USERS.find(u => u.id === item?.userId) || MOCK_USERS[0];
+
+    const [ownerProfile, setOwnerProfile] = useState(null);
+
+    // Resolve the real lender. Order: pre-joined owner → fetched profile → mock user by ownerId.
+    // Never fall back to a random mock user (that bug made every item read "Rahul").
+    const owner = item?.owner
+        || ownerProfile
+        || MOCK_USERS.find(u => u.id === (item?.ownerId || item?.owner_id))
+        || { name: 'the owner', avatar: 'https://ui-avatars.com/api/?name=Owner&background=E5DFD6&color=6b7c73' };
+
+    // For real (non-guest) users, fetch the owner's profile so the name/avatar are correct.
+    React.useEffect(() => {
+        const oid = item?.ownerId || item?.owner_id;
+        if (!oid || item?.owner || user?.email === 'guest@mayiborrow.com') return;
+        let cancelled = false;
+        (async () => {
+            const { data } = await supabase
+                .from('profiles')
+                .select('id, full_name, avatar_url')
+                .eq('id', oid)
+                .maybeSingle();
+            if (!cancelled && data) {
+                setOwnerProfile({
+                    name: data.full_name || 'the owner',
+                    avatar: data.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.full_name || 'Owner')}`
+                });
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [item?.ownerId, item?.owner_id, item?.owner, user?.email]);
 
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [requestReason, setRequestReason] = useState('');
@@ -34,13 +62,54 @@ const ItemDetails = () => {
     const [mediationStep, setMediationStep] = useState('question'); // question, success
     const [selectedQuestion, setSelectedQuestion] = useState('');
 
-    // Mock Mutual Friend (Visual only for now, but ID needed for DB)
-    // accessible Mutual Friend ID - utilizing the owner's ID or user's ID as placeholder if no distinct graph exists
-    const mutualFriend = {
-        id: user?.id, // using current user as mutual friend for testing FK constraints
-        name: 'Amit Sharma',
-        avatar: 'https://cdn.usegalileo.ai/sdxl10/602f9282-58bc-462b-b9c1-d4fda0b59f3c.png'
-    };
+    // Inquiry State (general "ask a mutual friend about this item")
+    const [showInquiryModal, setShowInquiryModal] = useState(false);
+    const [inquiryText, setInquiryText] = useState('');
+    const [inquirySaving, setInquirySaving] = useState(false);
+    const [inquirySent, setInquirySent] = useState(false);
+
+    const guest = user?.email === 'guest@mayiborrow.com';
+
+    // Real mutual friend: a person who shares a group with the owner (not the owner, not me).
+    // Previously this was hardcoded to the current user's own id — so the "temperature check"
+    // was silently sent to yourself. Now we resolve an actual third party.
+    const [mutualFriend, setMutualFriend] = useState(null);
+
+    React.useEffect(() => {
+        if (!item) return;
+        const ownerId = item.ownerId || item.owner_id;
+
+        if (guest) {
+            const mate = MOCK_USERS.find(u => u.id !== ownerId && (u.groups || []).includes(item.groupId));
+            setMutualFriend(mate ? { id: mate.id, name: mate.name, avatar: mate.avatar } : null);
+            return;
+        }
+
+        if (!ownerId || !user) return;
+        let cancelled = false;
+        (async () => {
+            const { data: ownerGroups } = await supabase
+                .from('group_members').select('group_id').eq('user_id', ownerId);
+            const gids = (ownerGroups || []).map(g => g.group_id);
+            if (!gids.length) return;
+            const { data: mates } = await supabase
+                .from('group_members')
+                .select('user_id, profiles(id, full_name, avatar_url)')
+                .in('group_id', gids)
+                .neq('user_id', ownerId)
+                .neq('user_id', user.id)
+                .limit(1);
+            const mate = mates?.[0];
+            if (!cancelled && mate) {
+                setMutualFriend({
+                    id: mate.profiles?.id || mate.user_id,
+                    name: mate.profiles?.full_name || 'A mutual friend',
+                    avatar: mate.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(mate.profiles?.full_name || 'Friend')}`
+                });
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [item?.id, item?.ownerId, item?.owner_id, user?.id, guest]);
 
     // Check for existing request
     React.useEffect(() => {
@@ -106,6 +175,18 @@ const ItemDetails = () => {
 
     const handleMediationSubmit = async () => {
         if (!user || !item) return;
+        if (!mutualFriend) { alert('No mutual friend found to mediate this one yet.'); return; }
+
+        // Guest mode is read-only — show the confirmation flow without writing to the DB.
+        if (guest) {
+            setMediationStep('success');
+            setTimeout(() => {
+                setShowMediationModal(false);
+                setMediationStep('question');
+                setSelectedQuestion('');
+            }, 2500);
+            return;
+        }
 
         try {
             const { data: mediation, error: mediationError } = await supabase
@@ -147,6 +228,53 @@ const ItemDetails = () => {
         } catch (error) {
             console.error('Error submitting mediation:', error);
             alert('Failed to send request. Please try again.');
+        }
+    };
+
+    const handleInquirySubmit = async () => {
+        const text = inquiryText.trim();
+        if (!user || !item || !mutualFriend || text.length < 5) return;
+
+        // Guest mode is read-only — show the confirmation without writing.
+        if (guest) {
+            setInquirySent(true);
+            setTimeout(() => { setShowInquiryModal(false); setInquirySent(false); setInquiryText(''); }, 2500);
+            return;
+        }
+
+        setInquirySaving(true);
+        try {
+            const ownerId = item.ownerId || item.owner_id;
+            const { data: inquiry, error } = await supabase
+                .from('item_inquiries')
+                .insert({
+                    item_id: item.id,
+                    inquirer_id: user.id,
+                    mediator_id: mutualFriend.id,
+                    lender_id: ownerId,
+                    message: text,
+                    status: 'PENDING'
+                })
+                .select()
+                .single();
+            if (error) throw error;
+
+            await supabase.from('notifications').insert({
+                user_id: mutualFriend.id,
+                type: 'ITEM_INQUIRY',
+                content: `${user.user_metadata?.full_name || 'A friend'} asked you about ${item.name}.`,
+                related_id: inquiry.id,
+                related_type: 'inquiry',
+                is_read: false
+            });
+
+            setInquirySent(true);
+            setTimeout(() => { setShowInquiryModal(false); setInquirySent(false); setInquiryText(''); }, 2500);
+        } catch (err) {
+            console.error('Error submitting inquiry:', err);
+            alert(`Couldn't send your question: ${err.message}`);
+        } finally {
+            setInquirySaving(false);
         }
     };
 
@@ -205,13 +333,15 @@ const ItemDetails = () => {
                     </div>
 
                     {/* Point 3: Mutual Connection Visualization */}
-                    {item.visibility === 'network' && (
+                    {item.visibility === 'network' && mutualFriend && (
                         <div className="absolute right-0 top-0 bottom-0 bg-indigo-50/50 w-2/3 flex items-center justify-end px-3">
                             <div className="flex items-center text-xs text-indigo-800 font-medium opacity-80">
                                 <span className="mr-2 text-right leading-tight">Connected via<br /><strong>{mutualFriend.name}</strong></span>
                                 <div className="flex -space-x-2">
                                     <div className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[8px]">You</div>
-                                    <div className="w-6 h-6 rounded-full bg-indigo-200 border-2 border-white flex items-center justify-center text-[8px]">AS</div>
+                                    <div className="w-6 h-6 rounded-full bg-indigo-200 border-2 border-white flex items-center justify-center text-[8px] overflow-hidden">
+                                        {mutualFriend.avatar ? <img src={mutualFriend.avatar} className="w-full h-full object-cover" alt="" /> : (mutualFriend.name?.[0] || 'F')}
+                                    </div>
                                     <img src={owner.avatar} className="w-6 h-6 rounded-full border-2 border-white" alt="" />
                                 </div>
                             </div>
@@ -307,6 +437,16 @@ const ItemDetails = () => {
                                     : `${owner.name} accepted your request! Coordinate pickup.`}
                             </p>
                         </div>
+                    ) : (user?.id === (item.ownerId || item.owner_id)) ? (
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
+                            <p className="text-sm font-semibold text-gray-700">This is your item.</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Manage it from “My Items”.</p>
+                        </div>
+                    ) : item.status === 'BORROWED' ? (
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                            <p className="text-sm font-semibold text-amber-900">Currently borrowed</p>
+                            <p className="text-xs text-amber-700 mt-0.5">This item is out on loan right now — check back later.</p>
+                        </div>
                     ) : (
                         <button
                             onClick={() => setShowRequestModal(true)}
@@ -317,13 +457,23 @@ const ItemDetails = () => {
                     )}
 
                     {/* Mediation Trigger */}
-                    {item.visibility === 'network' && item.maintenanceAmount > 0 && (
+                    {item.visibility === 'network' && item.maintenanceAmount > 0 && mutualFriend && (
                         <button
                             onClick={() => setShowMediationModal(true)}
                             className="w-full text-center text-xs text-gray-400 hover:text-indigo-600 transition-colors py-1 flex items-center justify-center gap-1 group"
                         >
                             <span className="group-hover:underline">Feels a bit expensive? Ask {mutualFriend.name} for advice</span>
                             <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center text-[8px] text-gray-500 group-hover:bg-indigo-100 group-hover:text-indigo-600">?</div>
+                        </button>
+                    )}
+
+                    {/* Inquiry Trigger — general question via a mutual friend (any item) */}
+                    {mutualFriend && user?.id !== (item.ownerId || item.owner_id) && (
+                        <button
+                            onClick={() => setShowInquiryModal(true)}
+                            className="w-full text-center text-xs text-gray-400 hover:text-[#6b7c73] transition-colors py-1 flex items-center justify-center gap-1 group"
+                        >
+                            <span className="group-hover:underline">Have a question? Ask {mutualFriend.name} about this item</span>
                         </button>
                     )}
                 </div>
@@ -383,7 +533,9 @@ const ItemDetails = () => {
                         {mediationStep === 'question' ? (
                             <>
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-xl font-bold text-indigo-600">AS</div>
+                                    <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-xl font-bold text-indigo-600 overflow-hidden">
+                                        {mutualFriend?.avatar ? <img src={mutualFriend.avatar} className="w-full h-full object-cover" alt={mutualFriend.name} /> : (mutualFriend?.name?.[0] || 'F')}
+                                    </div>
                                     <div>
                                         <h2 className="text-lg font-bold text-gray-900">Check with {mutualFriend.name}</h2>
                                         <p className="text-xs text-gray-500">{mutualFriend.name} knows both you and {owner.name}.</p>
@@ -428,6 +580,51 @@ const ItemDetails = () => {
                                 </div>
                                 <h2 className="text-xl font-bold text-boho-text mb-2">Asking {mutualFriend.name}...</h2>
                                 <p className="text-boho-text-secondary text-sm">We've sent your question privately. {mutualFriend.name} will reply if they can help.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Inquiry Modal — general question about this item via a mutual friend */}
+            {showInquiryModal && mutualFriend && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl relative">
+                        <button onClick={() => setShowInquiryModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><CheckCircle size={20} className="rotate-45" /></button>
+                        {!inquirySent ? (
+                            <>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-12 h-12 rounded-full bg-[#6b7c73]/10 flex items-center justify-center text-xl font-bold text-[#6b7c73] overflow-hidden">
+                                        {mutualFriend.avatar ? <img src={mutualFriend.avatar} className="w-full h-full object-cover" alt={mutualFriend.name} /> : (mutualFriend.name?.[0] || 'F')}
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-gray-900">Ask {mutualFriend.name}</h2>
+                                        <p className="text-xs text-gray-500">A private question about “{item.name}”.</p>
+                                    </div>
+                                </div>
+                                <textarea
+                                    rows={3}
+                                    value={inquiryText}
+                                    onChange={(e) => setInquiryText(e.target.value)}
+                                    placeholder={`e.g. Is ${owner.name} reliable? Is this item in good shape?`}
+                                    aria-label="Your question"
+                                    className="w-full text-sm rounded-xl border border-gray-200 bg-gray-50 p-3 mb-4 focus:ring-2 focus:ring-[#6b7c73] focus:outline-none resize-none"
+                                />
+                                <button
+                                    disabled={inquirySaving || inquiryText.trim().length < 5}
+                                    onClick={handleInquirySubmit}
+                                    className="w-full py-3 bg-[#6b7c73] hover:bg-[#5b6b62] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-all"
+                                >
+                                    {inquirySaving ? 'Sending…' : `Ask ${mutualFriend.name} privately`}
+                                </button>
+                            </>
+                        ) : (
+                            <div className="text-center py-6">
+                                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-boho-paper text-sage-600 border border-boho-divider">
+                                    <CheckCircle size={32} />
+                                </div>
+                                <h2 className="text-xl font-bold text-boho-text mb-2">Question sent</h2>
+                                <p className="text-boho-text-secondary text-sm">{mutualFriend.name} will see it under “Inquiries” — you'll find it there too.</p>
                             </div>
                         )}
                     </div>

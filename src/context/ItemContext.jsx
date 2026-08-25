@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
-import { MOCK_ITEMS } from '../data/mockData';
+import { MOCK_ITEMS, MOCK_USERS } from '../data/mockData';
 
 const ItemContext = createContext();
 
@@ -32,7 +32,19 @@ export const ItemProvider = ({ children }) => {
         }
 
         if (user?.email === 'guest@mayiborrow.com') {
-            const mappedMock = MOCK_ITEMS.map(i => ({ ...i, image: i.image || i.image_url, availableUntil: i.availableUntil || i.available_until, pickupAddress: 'Bangalore' }));
+            const mappedMock = MOCK_ITEMS.map(i => {
+                const ownerProfile = MOCK_USERS.find(u => u.id === i.ownerId);
+                return {
+                    ...i,
+                    image: i.image || i.image_url,
+                    availableUntil: i.availableUntil || i.available_until,
+                    pickupAddress: i.pickupAddress || 'Address shared after request',
+                    maintenanceAmount: i.maintenanceAmount || i.surcharge || 0,
+                    maintenanceReason: i.maintenanceReason || (i.surcharge ? 'upkeep' : null),
+                    owner: ownerProfile,
+                    ownerName: ownerProfile?.name
+                };
+            });
             setFeedItems(mappedMock.filter(i => i.ownerId !== user.id && i.status !== 'BORROWED'));
             setUserItems(mappedMock.filter(i => i.ownerId === user.id));
             setBorrowedItems(mappedMock.filter(i => i.borrowedBy === user.id && i.status === 'BORROWED'));
@@ -56,7 +68,7 @@ export const ItemProvider = ({ children }) => {
 
         const { data, error } = await supabase
             .from('items')
-            .select('*')
+            .select('*, owner:profiles!items_owner_id_fkey(name:full_name, avatar:avatar_url)')
             .eq('owner_id', user.id)
             .neq('status', 'DELETED')
             .order('created_at', { ascending: false });
@@ -73,7 +85,7 @@ export const ItemProvider = ({ children }) => {
 
         const { data, error } = await supabase
             .from('items')
-            .select('*')
+            .select('*, owner:profiles!items_owner_id_fkey(name:full_name, avatar:avatar_url)')
             .eq('borrowed_by', user.id)
             .eq('status', 'BORROWED')
             .order('borrowed_until', { ascending: true });
@@ -93,7 +105,7 @@ export const ItemProvider = ({ children }) => {
 
         const { data, error } = await supabase
             .from('items')
-            .select('*')
+            .select('*, owner:profiles!items_owner_id_fkey(name:full_name, avatar:avatar_url)')
             .eq('status', 'AVAILABLE')
             .neq('owner_id', user.id) // Don't fetch my own items here
             .order('created_at', { ascending: false })
@@ -123,6 +135,8 @@ export const ItemProvider = ({ children }) => {
         image: i.image_url,
         availableUntil: i.available_until,
         ownerId: i.owner_id,
+        owner: i.owner || undefined,
+        ownerName: i.owner?.name || i.ownerName || 'Neighbor',
         pickupAddress: i.pickup_address || i.pickupAddress || 'Bangalore',
         pickupContact: i.pickup_contact || i.pickupContact,
         pickupTime: i.pickup_time || i.pickupTime,

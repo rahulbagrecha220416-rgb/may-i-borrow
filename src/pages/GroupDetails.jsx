@@ -8,6 +8,9 @@ import { useGroups } from '../context/GroupContext';
 import PageTransition from '../components/layout/PageTransition';
 import GroupProposals from '../components/groups/GroupProposals';
 import { Capacitor } from '@capacitor/core';
+import { MOCK_GROUPS, MOCK_USERS } from '../data/mockData';
+
+const isGuest = (user) => user?.email === 'guest@mayiborrow.com';
 
 const GroupDetails = () => {
     const { groupId } = useParams();
@@ -65,6 +68,30 @@ const GroupDetails = () => {
         const fetchGroupData = async () => {
             if (!groupId) return;
 
+            // Guest mode: hydrate the circle, members, and roles from mock data.
+            if (isGuest(user)) {
+                const mockGroup = MOCK_GROUPS.find(g => g.id === groupId);
+                if (mockGroup) {
+                    setGroup({
+                        ...mockGroup,
+                        image_url: mockGroup.image,
+                        governance_type: mockGroup.governanceType || 'monarchy'
+                    });
+                    setMembers((mockGroup.members || []).map((uid, idx) => {
+                        const u = MOCK_USERS.find(mu => mu.id === uid);
+                        return {
+                            id: uid,
+                            name: u?.name || 'Member',
+                            avatar: u?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u?.name || 'Member')}`,
+                            role: idx === 0 ? 'admin' : 'member'
+                        };
+                    }));
+                    setCurrentUserRole('member');
+                }
+                setLoading(false);
+                return;
+            }
+
             if (group) {
                 try { await fetchMembers(); } catch (err) { console.error(err); }
                 setLoading(false);
@@ -94,6 +121,7 @@ const GroupDetails = () => {
     }, [groupId]);
 
     const handleLeaveGroup = async () => {
+        if (isGuest(user)) { alert('Guest mode is read-only. Sign in to manage your circles.'); return; }
         if (!user || !window.confirm("Are you sure you want to leave this group?")) return;
         setLeaving(true);
         try {
@@ -124,6 +152,7 @@ const GroupDetails = () => {
     };
 
     const handleRemoveMember = async (memberId, memberName) => {
+        if (isGuest(user)) { alert('Guest mode is read-only. Sign in to manage members.'); return; }
         if (!window.confirm(`Remove ${memberName} from this group?`)) return;
         setRemovingMember(memberId);
         try {
@@ -143,6 +172,7 @@ const GroupDetails = () => {
     };
 
     const handlePromoteMember = async (memberId, memberName) => {
+        if (isGuest(user)) { alert('Guest mode is read-only. Sign in to manage members.'); return; }
         if (!window.confirm(`Promote ${memberName} to admin?`)) return;
         try {
             const { error } = await supabase
@@ -313,7 +343,7 @@ const GroupDetails = () => {
                 </section>
 
                 {/* Proposals (Republic groups surface this more prominently, but available to all) */}
-                <GroupProposals groupId={groupId} userId={user?.id} isAdmin={isAdmin} />
+                <GroupProposals groupId={groupId} userId={user?.id} isAdmin={isAdmin} guest={isGuest(user)} />
 
                 {/* Available to Borrow */}
                 <section>

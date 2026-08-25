@@ -98,14 +98,21 @@ export const AuthProvider = ({ children }) => {
                 console.log('✅ Session active for:', newSession.user.email);
                 setSession(newSession);
 
-                // Fetch full profile for SIGNED_IN and USER_UPDATED events
+                // Set the user immediately from the session so the UI unlocks right away.
+                // IMPORTANT: never `await` a Supabase data call *inside* onAuthStateChange —
+                // the auth client holds a lock and awaiting here deadlocks (this was the cause
+                // of the "Auth loading took too long. Forcing unlock" hang + stuck login).
+                setUser(prev => prev ? { ...prev, ...newSession.user } : newSession.user);
+
+                // Fetch the full profile OUTSIDE the auth callback (deferred), then merge.
                 if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-                    const profile = await fetchProfile(newSession.user);
-                    setUser({ ...newSession.user, ...profile, isPremium: profile?.is_premium });
-                    if (event === 'SIGNED_IN') registerPushNotifications(newSession.user.id);
-                } else {
-                    // For other events, just update session without full profile fetch
-                    setUser(prev => prev ? { ...prev, ...newSession.user } : newSession.user);
+                    setTimeout(async () => {
+                        const profile = await fetchProfile(newSession.user);
+                        if (profile) {
+                            setUser(prev => ({ ...(prev || newSession.user), ...profile, isPremium: profile?.is_premium }));
+                        }
+                        if (event === 'SIGNED_IN') registerPushNotifications(newSession.user.id);
+                    }, 0);
                 }
             } else if (event === 'INITIAL_SESSION') {
                 // Only clear on initial session check if no session

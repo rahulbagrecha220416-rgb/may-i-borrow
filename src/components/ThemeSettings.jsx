@@ -16,7 +16,7 @@ const ThemeSettings = () => {
                 <h3 className="font-bold text-gray-900 dark:text-white">Theme Settings</h3>
                 <button
                     onClick={resetToDefault}
-                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
                 >
                     Reset to Default
                 </button>
@@ -30,7 +30,7 @@ const ThemeSettings = () => {
                 </div>
                 <button
                     onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    className={`relative w-12 h-6 rounded-full transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-gray-300'
+                    className={`relative w-12 h-6 rounded-full transition-colors ${theme === 'dark' ? 'bg-sage-500' : 'bg-gray-300'
                         }`}
                 >
                     <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${theme === 'dark' ? 'translate-x-6' : ''
@@ -54,7 +54,7 @@ const ThemeSettings = () => {
                     step="5"
                     value={greyscaleLevel}
                     onChange={(e) => setGreyscaleLevel(parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600"
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-sage-500"
                 />
                 <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
                     <span>Full Color</span>

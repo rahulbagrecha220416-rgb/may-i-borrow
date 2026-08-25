@@ -13,37 +13,51 @@ body {
     transition: background-color 0.3s ease;
 }
 
-/* Dark mode styles */
-.dark body {
-    background-color: #2A1F1A;
-    /* boho-dark-bg */
-    color: #F5E6D3;
-    /* boho-sand */
-}
+/* ===================== Dark mode =====================
+   Driven entirely by mapping the app's semantic tokens + common
+   utility classes under `.dark`, so all 26 screens flip coherently
+   without per-component edits. Warm boho-aligned dark palette:
+     page  #2A1F1A   card #3D2E24   text #F2ECE3   border #4A3D33  */
+.dark body { background-color: #2A1F1A; color: #F2ECE3; }
 
-.dark .bg-gray-50 {
-    background-color: #1e293b;
-}
+/* Page-level backgrounds */
+.dark .bg-boho-bg,
+.dark .bg-warm-bg { background-color: #2A1F1A; }
 
-.dark .text-gray-900 {
-    color: #f1f5f9;
-}
+/* Card / inset surfaces */
+.dark .bg-white,
+.dark .bg-boho-paper,
+.dark .bg-boho-card,
+.dark .bg-warm-card,
+.dark .bg-gray-50,
+.dark .bg-gray-100 { background-color: #3D2E24; }
 
-.dark .text-gray-500 {
-    color: #94a3b8;
-}
+/* Primary text */
+.dark .text-boho-text,
+.dark .text-warm-text,
+.dark .text-gray-900,
+.dark .text-gray-800 { color: #F2ECE3; }
 
-.dark .text-gray-400 {
-    color: #cbd5e1;
-}
+/* Secondary text */
+.dark .text-boho-text-secondary,
+.dark .text-warm-muted,
+.dark .text-gray-700,
+.dark .text-gray-600,
+.dark .text-gray-500 { color: #B8AD9F; }
 
-.dark .border-gray-100 {
-    border-color: #334155;
-}
+.dark .text-gray-400 { color: #8A8076; }
 
-.dark .border-gray-200 {
-    border-color: #475569;
-}
+/* Borders / dividers */
+.dark .border-boho-divider,
+.dark .border-warm-border,
+.dark .border-gray-100,
+.dark .border-gray-200 { border-color: #4A3D33; }
+
+/* Inline warm-beige backgrounds used on a few screens (set via style prop) */
+.dark [style*="rgb(242, 236, 227)"],
+.dark [style*="#F2ECE3"] { background-color: #2A1F1A !important; }
+.dark [style*="rgb(247, 242, 235)"],
+.dark [style*="#F7F2EB"] { background-color: #3D2E24 !important; }
 
 /* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {

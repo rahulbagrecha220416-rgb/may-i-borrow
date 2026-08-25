@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ItemProvider } from './context/ItemContext';
@@ -7,27 +7,29 @@ import { RequestProvider } from './context/RequestContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
 import AppLayout from './components/layout/AppLayout';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import Groups from './pages/Groups';
-import GroupDetails from './pages/GroupDetails';
-import ItemDetails from './pages/ItemDetails';
-import AddItem from './pages/AddItem';
-import Profile from './pages/Profile';
-import CreateGroup from './pages/CreateGroup';
-import AddRequest from './pages/AddRequest';
-import Notifications from './pages/Notifications';
-import Settings from './pages/Settings';
-import Upgrade from './pages/Upgrade'; // Import Upgrade Page
-import JoinGroup from './pages/JoinGroup';
-import AuthCallback from './pages/AuthCallback';
-import MyItems from './pages/MyItems';
-import EditItem from './pages/EditItem';
-import MyBorrowedItems from './pages/MyBorrowedItems';
-import MyLentItems from './pages/MyLentItems';
-import Mediations from './pages/Mediations';
-import Inquiries from './pages/Inquiries';
+
+// Route-level code splitting — each page is its own chunk, shrinking the initial bundle.
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Groups = lazy(() => import('./pages/Groups'));
+const GroupDetails = lazy(() => import('./pages/GroupDetails'));
+const ItemDetails = lazy(() => import('./pages/ItemDetails'));
+const AddItem = lazy(() => import('./pages/AddItem'));
+const Profile = lazy(() => import('./pages/Profile'));
+const CreateGroup = lazy(() => import('./pages/CreateGroup'));
+const AddRequest = lazy(() => import('./pages/AddRequest'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Upgrade = lazy(() => import('./pages/Upgrade'));
+const JoinGroup = lazy(() => import('./pages/JoinGroup'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
+const MyItems = lazy(() => import('./pages/MyItems'));
+const EditItem = lazy(() => import('./pages/EditItem'));
+const MyBorrowedItems = lazy(() => import('./pages/MyBorrowedItems'));
+const MyLentItems = lazy(() => import('./pages/MyLentItems'));
+const Mediations = lazy(() => import('./pages/Mediations'));
+const Inquiries = lazy(() => import('./pages/Inquiries'));
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
@@ -58,6 +60,11 @@ function App() {
               <RequestProvider>
                 <NotificationProvider>
                   <HashRouter>
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center min-h-screen">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6b7c73]"></div>
+                      </div>
+                    }>
                     <Routes>
                       <Route path="/" element={<AppLayout />}>
                         <Route index element={
@@ -152,6 +159,7 @@ function App() {
                         } />
                       </Route>
                     </Routes>
+                    </Suspense>
                   </HashRouter>
                 </NotificationProvider>
               </RequestProvider>

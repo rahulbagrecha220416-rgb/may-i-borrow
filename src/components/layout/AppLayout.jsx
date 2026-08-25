@@ -38,6 +38,7 @@ const AppLayout = () => {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate('/notifications')}
+                        aria-label="Notifications"
                         className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
                     >
                         <Bell size={20} />
@@ -91,6 +92,7 @@ const AppLayout = () => {
                     </NavLink>
 
                     <NavLink to="/add-item"
+                        aria-label="Add an item to lend"
                         className={({ isActive }) => clsx("flex flex-col items-center p-2 -mt-8",
                         )}>
                         {({ isActive }) => (

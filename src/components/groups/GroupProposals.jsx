@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Vote, Plus, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
+import { MOCK_PROPOSALS } from '../../data/mockData';
 
-const GroupProposals = ({ groupId, userId, isAdmin }) => {
+const GroupProposals = ({ groupId, userId, isAdmin, guest }) => {
     const [proposals, setProposals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showCreate, setShowCreate] = useState(false);
@@ -12,6 +13,11 @@ const GroupProposals = ({ groupId, userId, isAdmin }) => {
 
     const load = async () => {
         setLoading(true);
+        if (guest) {
+            setProposals(MOCK_PROPOSALS[groupId] || []);
+            setLoading(false);
+            return;
+        }
         const { data: props } = await supabase
             .from('group_proposals')
             .select('id, title, description, status, created_at, closed_at, created_by')
@@ -41,9 +47,10 @@ const GroupProposals = ({ groupId, userId, isAdmin }) => {
         setLoading(false);
     };
 
-    useEffect(() => { if (groupId && userId) load(); }, [groupId, userId]);
+    useEffect(() => { if (groupId && userId) load(); }, [groupId, userId, guest]);
 
     const createProposal = async () => {
+        if (guest) { alert('Guest mode is read-only. Sign in to start a proposal.'); return; }
         if (!newTitle.trim()) return;
         setCreating(true);
         const { error } = await supabase
@@ -66,6 +73,7 @@ const GroupProposals = ({ groupId, userId, isAdmin }) => {
     };
 
     const castVote = async (proposalId, vote) => {
+        if (guest) { alert('Guest mode is read-only. Sign in to vote.'); return; }
         // Upsert: delete any existing vote first, then insert.
         await supabase
             .from('proposal_votes')
@@ -84,6 +92,7 @@ const GroupProposals = ({ groupId, userId, isAdmin }) => {
     };
 
     const closeProposal = async (proposalId) => {
+        if (guest) { alert('Guest mode is read-only. Sign in to close a proposal.'); return; }
         if (!window.confirm('Close this proposal? Voting will end.')) return;
         const { error } = await supabase
             .from('group_proposals')
