@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, Heart, MapPin, Phone, Clock } from 'lucide-react';
 import { supabase } from '../supabaseClient';
@@ -23,13 +23,7 @@ const MyBorrowedItems = () => {
     const [randomPhrase, setRandomPhrase] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
 
-    useEffect(() => {
-        if (!authLoading && user) {
-            fetchRequestHistory();
-        }
-    }, [user, authLoading]);
-
-    const fetchRequestHistory = async () => {
+    const fetchRequestHistory = useCallback(async () => {
         setHistoryLoading(true);
         try {
             const { data, error } = await supabase
@@ -49,7 +43,7 @@ const MyBorrowedItems = () => {
         } finally {
             setHistoryLoading(false);
         }
-    };
+    }, [user]);
 
     const handleSayThanksClick = (item) => {
         const thanksSent = localStorage.getItem(`thanks_sent_${item.id}`);
@@ -60,6 +54,13 @@ const MyBorrowedItems = () => {
         setRandomPhrase(getRandomPhrase());
         setShowThanksPrompt(item);
     };
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            fetchRequestHistory();
+        }
+    }, [user, authLoading, fetchRequestHistory]);
+
 
     const sayThanks = async (item) => {
         try {

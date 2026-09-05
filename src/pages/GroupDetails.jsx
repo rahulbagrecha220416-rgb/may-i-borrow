@@ -25,7 +25,6 @@ const GroupDetails = () => {
     const [leaving, setLeaving] = useState(false);
     const [removingMember, setRemovingMember] = useState(null);
     const [currentUserRole, setCurrentUserRole] = useState('member');
-    const [inviteLink, setInviteLink] = useState('');
     const [copied, setCopied] = useState(false);
 
     const isAdmin = currentUserRole === 'admin';
@@ -117,7 +116,9 @@ const GroupDetails = () => {
         };
 
         fetchGroupData();
-        setInviteLink(buildInviteLink(groupId));
+        // Runs once per circle. `group` and `user` are only read for the guest and
+        // re-entry shortcuts; keying on them would refetch members on every render.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [groupId]);
 
     const handleLeaveGroup = async () => {
@@ -190,7 +191,6 @@ const GroupDetails = () => {
 
     const handleShareInvite = async () => {
         const link = buildInviteLink(groupId);
-        setInviteLink(link);
 
         if (Capacitor.isNativePlatform() && navigator.share) {
             try {

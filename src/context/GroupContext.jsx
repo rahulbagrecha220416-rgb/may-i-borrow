@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
 import { MOCK_GROUPS } from '../data/mockData';
@@ -20,7 +20,7 @@ export const GroupProvider = ({ children }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
 
-    const fetchGroups = async (isManualRefresh = false) => {
+    const fetchGroups = useCallback(async (isManualRefresh = false) => {
         try {
             if (isManualRefresh) setRefreshing(true);
             else setLoading(true);
@@ -73,7 +73,7 @@ export const GroupProvider = ({ children }) => {
             setLoading(false);
             if (isManualRefresh) setRefreshing(false);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         // CRITICAL FIX: Wait for auth to finish loading
@@ -89,9 +89,9 @@ export const GroupProvider = ({ children }) => {
             console.log('ℹ️ No user, clearing groups');
             setGroups([]);
         }
-    }, [user, authLoading]); // Add authLoading dependency
+    }, [user, authLoading, fetchGroups]);
 
-    const refreshGroups = () => fetchGroups(true);
+    const refreshGroups = useCallback(() => fetchGroups(true), [fetchGroups]);
 
     const createGroup = async (newGroupData) => {
         if (!user) return null;

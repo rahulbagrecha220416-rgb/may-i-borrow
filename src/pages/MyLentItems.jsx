@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '../supabaseClient';
@@ -22,13 +22,7 @@ const MyLentItems = () => {
     // Compute lent items from myItems in context
     const lentItems = myItems.filter(item => item.status === 'BORROWED');
 
-    useEffect(() => {
-        if (!authLoading && user) {
-            fetchRequestHistory();
-        }
-    }, [user, authLoading]);
-
-    const fetchRequestHistory = async () => {
+    const fetchRequestHistory = useCallback(async () => {
         setHistoryLoading(true);
         try {
             // Fetch requests for items owned by this user
@@ -49,7 +43,7 @@ const MyLentItems = () => {
         } finally {
             setHistoryLoading(false);
         }
-    };
+    }, [user]);
 
     const sendReminder = async (item) => {
         if (!item.borrowed_by) return;
@@ -81,6 +75,13 @@ const MyLentItems = () => {
             alert('Could not send reminder.');
         }
     };
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            fetchRequestHistory();
+        }
+    }, [user, authLoading, fetchRequestHistory]);
+
 
     const handleReturn = async (action) => {
         if (!selectedItem) return;

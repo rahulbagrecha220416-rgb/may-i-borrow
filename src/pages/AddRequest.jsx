@@ -2,16 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Users, Globe, Lock } from 'lucide-react';
 import { useRequests } from '../context/RequestContext';
-import { useGroups } from '../context/GroupContext';
-import { useAuth } from '../context/AuthContext';
 import PageTransition from '../components/layout/PageTransition';
 
 const AddRequest = () => {
     const navigate = useNavigate();
     const { addRequest } = useRequests();
-    const { groups } = useGroups();
-    const { user } = useAuth();
-    const isPremium = user?.isPremium;
 
     const [formData, setFormData] = useState({
         title: '',

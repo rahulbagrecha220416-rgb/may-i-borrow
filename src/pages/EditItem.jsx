@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Camera, X, MapPin, Phone, ArrowLeft } from 'lucide-react';
 import { useItems } from '../context/ItemContext';
-import { useGroups } from '../context/GroupContext';
 import { useAuth } from '../context/AuthContext';
 import { uploadImage } from '../utils/uploadImage';
 import PageTransition from '../components/layout/PageTransition';
@@ -11,7 +10,6 @@ const EditItem = () => {
     const { itemId } = useParams();
     const navigate = useNavigate();
     const { items, updateItem } = useItems();
-    const { groups } = useGroups();
     const { user } = useAuth();
     const fileInputRef = useRef(null);
     const [imagePreview, setImagePreview] = useState(null);

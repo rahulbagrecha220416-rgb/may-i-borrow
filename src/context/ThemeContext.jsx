@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const ThemeContext = createContext();
 
@@ -20,17 +20,7 @@ export const ThemeProvider = ({ children }) => {
         return 0;
     });
 
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('theme', theme);
-            localStorage.setItem('greyscaleLevel', greyscaleLevel);
-        }
-
-        // Apply theme to document
-        applyTheme();
-    }, [theme, greyscaleLevel]);
-
-    const applyTheme = () => {
+    const applyTheme = useCallback(() => {
         if (typeof document === 'undefined') return;
 
         const root = document.documentElement;
@@ -45,11 +35,22 @@ export const ThemeProvider = ({ children }) => {
         // Greyscale filter disabled - conflicts with boho color palette
         // Setting to 'none' to ensure warm colors display correctly
         root.style.filter = 'none';
-    };
+    }, [theme]);
 
     const cycleTheme = () => {
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
     };
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('theme', theme);
+            localStorage.setItem('greyscaleLevel', greyscaleLevel);
+        }
+
+        // Apply theme to document
+        applyTheme();
+    }, [theme, greyscaleLevel, applyTheme]);
+
 
     return (
         <ThemeContext.Provider value={{

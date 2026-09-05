@@ -54,7 +54,9 @@ export const ItemProvider = ({ children }) => {
 
         loadInitialData();
 
-        // Removed realtime subscription from here to avoid complexity in this step
+        // The fetchers close over the same `user` this effect is keyed on; listing
+        // them would only add churn (they are re-created every render).
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, authLoading]);
 
     const loadInitialData = async () => {

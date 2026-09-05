@@ -10,7 +10,7 @@ const Notifications = () => {
     const navigate = useNavigate();
     const { notifications, markAsRead, fetchNotifications } = useNotifications();
     const { acceptRequest, rejectRequest } = useRequests();
-    const [resolvingId, setResolvingId] = useState(null);
+    const [, setResolvingId] = useState(null);
 
     const handleAccept = async (notification) => {
         try {

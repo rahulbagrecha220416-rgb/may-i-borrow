@@ -240,7 +240,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     // Login function (Supabase handles this usually via UI, but keeping wrapper for consistency)
-    const login = async (email, password) => {
+    const login = async () => {
         // For MVP phase 2, we can fallback to mock if keys are missing
         if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your_supabase_url')) {
             console.warn("Supabase keys missing. Using mock login.");

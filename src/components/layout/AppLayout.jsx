@@ -93,7 +93,7 @@ const AppLayout = () => {
 
                     <NavLink to="/add-item"
                         aria-label="Add an item to lend"
-                        className={({ isActive }) => clsx("flex flex-col items-center p-2 -mt-8",
+                        className={() => clsx("flex flex-col items-center p-2 -mt-8",
                         )}>
                         {({ isActive }) => (
                             <div className={clsx("w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105",

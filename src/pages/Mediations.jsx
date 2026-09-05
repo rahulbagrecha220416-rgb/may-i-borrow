@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Shield, Clock, CheckCircle2, XCircle, MessageSquare } from 'lucide-react';
 import { supabase } from '../supabaseClient';
@@ -21,7 +21,7 @@ const Mediations = () => {
     const [loading, setLoading] = useState(true);
     const [resolvingId, setResolvingId] = useState(null);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         if (!user) return;
         setLoading(true);
         const column = tab === 'mine' ? 'requester_id' : 'mutual_friend_id';
@@ -34,9 +34,9 @@ const Mediations = () => {
         if (error) console.error('Mediations load error:', error);
         setRows(data || []);
         setLoading(false);
-    };
+    }, [user, tab]);
 
-    useEffect(() => { load(); }, [user, tab]);
+    useEffect(() => { load(); }, [load]);
 
     const updateStatus = async (id, status) => {
         setResolvingId(id);

@@ -172,3 +172,19 @@ stores the FCM token on `profiles.fcm_token`. `RequestContext` already fires
 `sendPushTo(...)` after creating the in-app notification for new borrow
 requests and acceptances — so once the pieces above are in place, push works
 end-to-end with no other code changes.
+
+## migration_perf_advisors.sql (5 Sep 2026)
+
+Applied to the live project the same day (Supabase migration
+`perf_advisors_fk_indexes_policy_merge`). Clears every performance-advisor
+finding without changing permissions:
+
+- covering indexes on the 12 foreign keys that had none;
+- the duplicate permissive policies on `items`, `requests`, `mediations`,
+  `item_inquiries` and `group_members` merged into one policy per action (each
+  merged expression is the OR of the ones it replaced);
+- every `auth.uid()` / `auth.role()` inside a policy wrapped in `(select …)`
+  so it is evaluated once per query instead of once per row.
+
+Unused indexes were left alone on purpose — with a handful of users the usage
+stats say nothing yet. Verified afterwards with `node scripts/flow-test.mjs`.

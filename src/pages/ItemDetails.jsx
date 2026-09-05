@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, CheckCircle } from 'lucide-react';
 import { MOCK_USERS } from '../data/mockData';
@@ -109,18 +109,14 @@ const ItemDetails = () => {
             }
         })();
         return () => { cancelled = true; };
+        // Keyed on the ids actually read — the `item`/`user` objects change identity
+        // on every feed refresh and would re-run the mutual-friend lookup each time.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [item?.id, item?.ownerId, item?.owner_id, user?.id, guest]);
 
-    // Check for existing request
-    React.useEffect(() => {
-        if (user && item?.id) {
-            checkExistingRequest();
-        }
-    }, [user, item?.id]);
-
-    const checkExistingRequest = async () => {
+    const checkExistingRequest = useCallback(async () => {
         try {
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from('requests')
                 .select('*')
                 .eq('user_id', user.id)
@@ -138,7 +134,15 @@ const ItemDetails = () => {
         } catch (error) {
             console.error('Error checking existing request:', error);
         }
-    };
+    }, [user?.id, item?.id]);
+
+    // Check for existing request
+    React.useEffect(() => {
+        if (user && item?.id) {
+            checkExistingRequest();
+        }
+    }, [user, item?.id, checkExistingRequest]);
+
 
     const handleBorrowRequest = async () => {
         if (!hasAgreed || requestReason.length < 10 || isSubmitting) return;

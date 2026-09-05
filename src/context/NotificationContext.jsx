@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
 
@@ -16,7 +16,7 @@ export const NotificationProvider = ({ children }) => {
     });
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = useCallback(async () => {
         if (!user) return;
 
         if (user.email === 'guest@mayiborrow.com') {
@@ -51,7 +51,7 @@ export const NotificationProvider = ({ children }) => {
             setNotifications(notifData);
             setUnreadCount(notifData.filter(n => !n.is_read).length);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         if (authLoading) return;
@@ -90,7 +90,7 @@ export const NotificationProvider = ({ children }) => {
         return () => {
             supabase.removeChannel(notifSubscription);
         };
-    }, [user, authLoading]); // Add authLoading dependency
+    }, [user, authLoading, fetchNotifications]);
 
     const markAsRead = async (id) => {
         if (user?.email === 'guest@mayiborrow.com') {

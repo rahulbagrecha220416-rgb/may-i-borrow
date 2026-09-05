@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Vote, Plus, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 import { MOCK_PROPOSALS } from '../../data/mockData';
@@ -11,7 +11,7 @@ const GroupProposals = ({ groupId, userId, isAdmin, guest }) => {
     const [newTitle, setNewTitle] = useState('');
     const [newDesc, setNewDesc] = useState('');
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         if (guest) {
             setProposals(MOCK_PROPOSALS[groupId] || []);
@@ -45,9 +45,9 @@ const GroupProposals = ({ groupId, userId, isAdmin, guest }) => {
 
         setProposals(withTallies);
         setLoading(false);
-    };
+    }, [groupId, userId, guest]);
 
-    useEffect(() => { if (groupId && userId) load(); }, [groupId, userId, guest]);
+    useEffect(() => { if (groupId && userId) load(); }, [groupId, userId, load]);
 
     const createProposal = async () => {
         if (guest) { alert('Guest mode is read-only. Sign in to start a proposal.'); return; }

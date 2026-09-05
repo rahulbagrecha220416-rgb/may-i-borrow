@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Users, Info, CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useGroups } from '../context/GroupContext';
@@ -10,9 +9,8 @@ import PageTransition from '../components/layout/PageTransition';
 
 const JoinGroup = () => {
     const { groupId } = useParams();
-    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const { user, loginAsGuest } = useAuth();
+    const { user } = useAuth();
     const { refreshGroups } = useGroups();
 
     const [group, setGroup] = useState(null);
@@ -59,17 +57,7 @@ const JoinGroup = () => {
         fetchGroupDetails();
     }, [groupId, user]);
 
-    useEffect(() => {
-        // Auto-Join Requirement: "it should open the app and join the group"
-        if (group && user && !alreadyMember && !joining && !error) {
-            const timer = setTimeout(() => {
-                handleJoin();
-            }, 800); // Small delay to let UI settle/animation play
-            return () => clearTimeout(timer);
-        }
-    }, [group, user, alreadyMember, joining, error]);
-
-    const handleJoin = async () => {
+    const handleJoin = useCallback(async () => {
         if (!user) {
             // Store return URL
             localStorage.setItem('returnUrl', `/join/${groupId}`);
@@ -80,7 +68,7 @@ const JoinGroup = () => {
         setJoining(true);
         try {
             // 1. Ensure Profile Exists (Self Healing - Reuse logic)
-            const { error: profileError } = await supabase.from('profiles').insert({
+            await supabase.from('profiles').insert({
                 id: user.id,
                 email: user.email,
                 full_name: user.user_metadata?.full_name || 'User',
@@ -119,7 +107,18 @@ const JoinGroup = () => {
         } finally {
             // setJoining(false); // Done above to prevent flicker on valid nav
         }
-    };
+    }, [user, groupId, group, navigate, refreshGroups]);
+
+    useEffect(() => {
+        // Auto-Join Requirement: "it should open the app and join the group"
+        if (group && user && !alreadyMember && !joining && !error) {
+            const timer = setTimeout(() => {
+                handleJoin();
+            }, 800); // Small delay to let UI settle/animation play
+            return () => clearTimeout(timer);
+        }
+    }, [group, user, alreadyMember, joining, error, handleJoin]);
+
 
     if (loading) {
         return (

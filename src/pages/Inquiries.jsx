@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
@@ -22,7 +22,7 @@ const Inquiries = () => {
     const [response, setResponse] = useState({});
     const [saving, setSaving] = useState(null);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         if (!user) return;
         setLoading(true);
         const column = tab === 'mine' ? 'inquirer_id' : 'mediator_id';
@@ -35,9 +35,9 @@ const Inquiries = () => {
         if (error) console.error('Inquiries load error:', error);
         setRows(data || []);
         setLoading(false);
-    };
+    }, [user, tab]);
 
-    useEffect(() => { load(); }, [user, tab]);
+    useEffect(() => { load(); }, [load]);
 
     const submitResponse = async (id) => {
         const text = (response[id] || '').trim();
