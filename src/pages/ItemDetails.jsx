@@ -477,7 +477,10 @@ const ItemDetails = () => {
                             onClick={() => setShowInquiryModal(true)}
                             className="w-full text-center text-xs text-gray-400 hover:text-[#6b7c73] transition-colors py-1 flex items-center justify-center gap-1 group"
                         >
-                            <span className="group-hover:underline">Have a question? Ask {mutualFriend.name} about this item</span>
+                            {/* Copy names the relationship: without "who knows {owner}" this read as if
+                                the mutual friend owned the item ("Ask Rahul about this item" under a
+                                card whose lender is Priya). */}
+                            <span className="group-hover:underline">Have a question? Ask {mutualFriend.name}, who knows {owner.name}, about this item</span>
                         </button>
                     )}
                 </div>
