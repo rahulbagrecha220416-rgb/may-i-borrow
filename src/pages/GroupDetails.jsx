@@ -34,7 +34,7 @@ const GroupDetails = () => {
         if (Capacitor.isNativePlatform() || origin.includes('localhost')) {
             origin = import.meta.env.VITE_APP_URL || 'https://may-i-borrow.vercel.app';
         }
-        return `${origin}/join/${gId}?ref=${Math.random().toString(36).substring(7)}`;
+        return `${origin}/#/join/${gId}?ref=${Math.random().toString(36).substring(7)}`;
     };
 
     const fetchMembers = async () => {
@@ -192,11 +192,12 @@ const GroupDetails = () => {
     const handleShareInvite = async () => {
         const link = buildInviteLink(groupId);
 
-        if (Capacitor.isNativePlatform() && navigator.share) {
+        // Share sheet on phones (native app and mobile browsers), clipboard on desktop
+        if (navigator.share && (Capacitor.isNativePlatform() || navigator.maxTouchPoints > 0)) {
             try {
                 await navigator.share({
-                    title: `Join ${group?.name} on May I Borrow`,
-                    text: `Hey! Join our lending circle "${group?.name}" on May I Borrow.`,
+                    title: `Join ${group?.name} on May We Borrow`,
+                    text: `Hey! Join our lending circle "${group?.name}" on May We Borrow.`,
                     url: link
                 });
             } catch (err) { console.warn('Share cancelled', err); }
@@ -349,8 +350,11 @@ const GroupDetails = () => {
                 <section>
                     <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3">Available to Borrow</h2>
                     <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                        <p className="text-gray-400 text-sm">Items loading coming soon...</p>
-                        <button onClick={() => navigate('/add-item')} className="mt-2 text-emerald-600 font-medium text-sm">Add Item</button>
+                        <p className="text-gray-400 text-sm">Everything this circle lends shows on your Home feed.</p>
+                        <div className="mt-2 flex items-center justify-center gap-4">
+                            <button onClick={() => navigate('/')} className="text-emerald-600 font-medium text-sm">Browse items</button>
+                            <button onClick={() => navigate('/add-item')} className="text-emerald-600 font-medium text-sm">Add Item</button>
+                        </div>
                     </div>
                 </section>
             </div>

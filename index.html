@@ -5,7 +5,18 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>may-i-borrow</title>
+  <title>May We Borrow — share things with your building or club</title>
+  <meta name="description" content="A free lending circle for apartment blocks and hobby clubs. List what you own, borrow from people you already know, instead of buying." />
+  <meta property="og:title" content="May We Borrow" />
+  <meta property="og:description" content="A free lending circle for your building or club. Borrow the drill instead of buying one." />
+  <meta property="og:type" content="website" />
+  <script>
+    // The app uses HashRouter with relative asset paths, so a path URL such as
+    // /join/<id> (shared invite links) would load a blank page. Move it into the hash.
+    if (location.pathname !== '/' && location.pathname !== '/index.html' && !location.hash) {
+      location.replace('/#' + location.pathname + location.search);
+    }
+  </script>
 </head>
 
 <body>

@@ -44,6 +44,25 @@ export const RequestProvider = ({ children }) => {
 
     const addRequest = async (requestData) => {
         if (!user) return;
+
+        // Guest mode works on mock items (ids like "i1"), so keep the request local
+        if (user.email === 'guest@mayiborrow.com') {
+            const mock = {
+                id: `guest-req-${Date.now()}`,
+                title: requestData.title,
+                description: requestData.description,
+                category: requestData.category,
+                user_id: user.id,
+                item_id: requestData.itemId || null,
+                group_ids: requestData.groupIds || [],
+                visibility: requestData.visibility || 'group',
+                status: 'PENDING',
+                created_at: new Date().toISOString()
+            };
+            setRequests(prev => [mock, ...prev]);
+            return mock;
+        }
+
         try {
             console.log('📝 Creating request...', requestData);
 

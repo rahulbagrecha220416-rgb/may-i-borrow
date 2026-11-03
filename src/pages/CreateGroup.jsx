@@ -166,7 +166,7 @@ const CreateGroup = () => {
                 origin = import.meta.env.VITE_APP_URL || 'https://may-i-borrow.vercel.app';
             }
 
-            const webLink = `${origin}/join/${newGroup.id}?ref=${Math.random().toString(36).substring(7)}`;
+            const webLink = `${origin}/#/join/${newGroup.id}?ref=${Math.random().toString(36).substring(7)}`;
             setInviteLink(webLink);
 
             if (typeof refreshGroups === 'function') refreshGroups();
@@ -186,7 +186,7 @@ const CreateGroup = () => {
                     const recoveryData = await recoveryResp.json();
                     if (recoveryData?.length > 0) {
                         const origin = import.meta.env.VITE_APP_URL || 'https://may-i-borrow.vercel.app';
-                        setInviteLink(`${origin}/join/${recoveryData[0].id}`);
+                        setInviteLink(`${origin}/#/join/${recoveryData[0].id}`);
                         if (typeof refreshGroups === 'function') refreshGroups();
                         setShowSuccess(true);
                         setCreating(false);
