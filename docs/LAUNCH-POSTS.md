@@ -29,7 +29,7 @@ A few choices I'd like opinions on:
 
 Stack: React + Vite, Supabase for auth and data, Google sign-in, Android wrapper via Capacitor. Solo project, no funding, not selling anything.
 
-Try it without signing up: https://may-i-borrow.vercel.app → "Continue as Guest" (that's sample data; sign in with Google to make a real group).
+Try it without signing up: https://mayweborrow.com → "Continue as Guest" (that's sample data; sign in with Google to make a real group).
 
 What would stop you from actually using this with your neighbours?
 
@@ -45,7 +45,7 @@ Made this because my building has eleven drills and nobody can find one when the
 
 How it works: create a group, share the invite link, list items, request items. The owner approves, the app tracks due dates and nudges both sides. Lending earns karma; some items are marked premium and cost karma to borrow. Every member signs a short pledge to look after what they borrow.
 
-Live at https://may-i-borrow.vercel.app. "Continue as Guest" shows a sample group so you can click around in ten seconds. Feedback on anything from the flow to the copy is welcome, especially from anyone who has tried to run a tool library or a shared-equipment group before.
+Live at https://mayweborrow.com. "Continue as Guest" shows a sample group so you can click around in ten seconds. Feedback on anything from the flow to the copy is welcome, especially from anyone who has tried to run a tool library or a shared-equipment group before.
 
 ---
 
@@ -59,7 +59,7 @@ Live at https://may-i-borrow.vercel.app. "Continue as Guest" shows a sample grou
 
 **The bet.** Peer-to-peer rental apps die on trust and logistics. Removing strangers removes most of the trust problem; keeping it inside apartment blocks, clubs and offices removes most of the logistics. What's left is a reputation system: a trust score from successful returns, karma from lending, premium items gated behind karma, and an optional mutual-friend "temperature check" before a request.
 
-**What exists today.** Web app (React + Supabase), Google sign-in, groups with invite links and two governance modes, items with availability windows and pickup or courier options, borrow requests with accept/decline, borrowed and lent views, notifications, a basic mediation flow for disputes, and an Android build. Live: https://may-i-borrow.vercel.app, guest mode available.
+**What exists today.** Web app (React + Supabase), Google sign-in, groups with invite links and two governance modes, items with availability windows and pickup or courier options, borrow requests with accept/decline, borrowed and lent views, notifications, a basic mediation flow for disputes, and an Android build. Live: https://mayweborrow.com, guest mode available.
 
 **What I don't know.** Whether anyone will maintain their listings after the novelty fades. Whether karma reads as fun or as a chore. Whether a group admin will actually police returns. I'd rather hear that it's a bad idea now than after another six months.
 
@@ -77,7 +77,7 @@ Hi HN. May We Borrow is a small web app for lending things inside a closed group
 
 It's React + Vite on the front, Supabase (Postgres + RLS + auth) on the back, Google sign-in, and a Capacitor wrapper for Android. Every borrow/lend path is exercised by an automated flow test every three days against the live database, which is also what keeps the free-tier project awake.
 
-Live: https://may-i-borrow.vercel.app ("Continue as Guest" for sample data). Source is not public yet.
+Live: https://mayweborrow.com ("Continue as Guest" for sample data). Source is not public yet.
 
 Happy to answer questions about the RLS policy design (per-group visibility without a backend server) or about the governance modes for groups.
 

@@ -5,7 +5,7 @@ Your building has eleven drills and nobody can find one when they need it. May W
 group of people who already know each other list what they own and borrow from each other
 instead of buying.
 
-**Try it:** https://may-i-borrow.vercel.app → tap **Continue as Guest** to look around a sample
+**Try it:** https://mayweborrow.com → tap **Continue as Guest** to look around a sample
 group, no sign-up needed. Sign in with Google to start a real group for your building.
 
 Free, no ads, no tracking, not a business. Built as a community service.

@@ -1,4 +1,18 @@
 {
+    "redirects": [
+        {
+            "source": "/(.*)",
+            "has": [{ "type": "host", "value": "may-i-borrow.vercel.app" }],
+            "destination": "https://mayweborrow.com/$1",
+            "permanent": true
+        },
+        {
+            "source": "/(.*)",
+            "has": [{ "type": "host", "value": "www.mayweborrow.com" }],
+            "destination": "https://mayweborrow.com/$1",
+            "permanent": true
+        }
+    ],
     "rewrites": [
         {
             "source": "/(.*)",

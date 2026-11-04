@@ -1,8 +1,7 @@
 # May We Borrow — directory listings
 
 > Drafted 3 Nov 2026. Submit each one once from your own account; they keep sending visitors
-> without further work. Same link everywhere: https://may-i-borrow.vercel.app
-> (swap in your own domain once it is connected to the Vercel project).
+> without further work. Same link everywhere: https://mayweborrow.com
 
 ## Shared copy (paste into any form)
 
@@ -30,7 +29,7 @@ Built as a community service. No ads, no tracking, not a business.
 **Categories / tags:** sharing economy, community, neighbours, lending library, library of
 things, apartment society, open source, free
 
-**Links:** web https://may-i-borrow.vercel.app ·
+**Links:** web https://mayweborrow.com ·
 source https://github.com/rahulbagrecha220416-rgb/may-i-borrow · Android: (Play Store link
 once published)
 

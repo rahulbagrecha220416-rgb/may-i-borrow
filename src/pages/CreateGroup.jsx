@@ -163,7 +163,7 @@ const CreateGroup = () => {
 
             let origin = window.location.origin;
             if (Capacitor.isNativePlatform() || origin.includes('localhost')) {
-                origin = import.meta.env.VITE_APP_URL || 'https://may-i-borrow.vercel.app';
+                origin = import.meta.env.VITE_APP_URL || 'https://mayweborrow.com';
             }
 
             const webLink = `${origin}/#/join/${newGroup.id}?ref=${Math.random().toString(36).substring(7)}`;
@@ -185,7 +185,7 @@ const CreateGroup = () => {
                     const recoveryResp = await fetch(`${supabase.supabaseUrl}/rest/v1/groups?created_by=eq.${user.id}&order=created_at.desc&limit=1`, { headers });
                     const recoveryData = await recoveryResp.json();
                     if (recoveryData?.length > 0) {
-                        const origin = import.meta.env.VITE_APP_URL || 'https://may-i-borrow.vercel.app';
+                        const origin = import.meta.env.VITE_APP_URL || 'https://mayweborrow.com';
                         setInviteLink(`${origin}/#/join/${recoveryData[0].id}`);
                         if (typeof refreshGroups === 'function') refreshGroups();
                         setShowSuccess(true);

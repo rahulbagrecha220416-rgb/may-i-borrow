@@ -59,10 +59,12 @@ const Login = () => {
                 }
             };
 
-            // Use custom scheme for Android, let web use default
+            // Use custom scheme for Android; on web, come back to the domain the visitor is on
             if (isNative) {
                 options.options.redirectTo = 'com.mayiborrow.app://callback';
                 options.options.skipBrowserRedirect = false;
+            } else {
+                options.options.redirectTo = window.location.origin + '/';
             }
 
             console.log('🔐 Initiating Google OAuth with:', isNative ? 'custom scheme' : 'web redirect');

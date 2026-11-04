@@ -2,7 +2,7 @@
 
 A lending app for apartment blocks and hobby clubs: members of a group list things they own
 and borrow from each other instead of buying. Public name in posts: **May We Borrow**.
-Live web build: `may-i-borrow.vercel.app`. Also shipped as an Android app (Capacitor).
+Live web build: `mayweborrow.com` (Namecheap DNS → Vercel; `may-i-borrow.vercel.app` redirects to it). Also shipped as an Android app (Capacitor).
 
 ## Stack
 

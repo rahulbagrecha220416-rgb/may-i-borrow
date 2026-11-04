@@ -32,7 +32,7 @@ const GroupDetails = () => {
     const buildInviteLink = (gId) => {
         let origin = window.location.origin;
         if (Capacitor.isNativePlatform() || origin.includes('localhost')) {
-            origin = import.meta.env.VITE_APP_URL || 'https://may-i-borrow.vercel.app';
+            origin = import.meta.env.VITE_APP_URL || 'https://mayweborrow.com';
         }
         return `${origin}/#/join/${gId}?ref=${Math.random().toString(36).substring(7)}`;
     };
